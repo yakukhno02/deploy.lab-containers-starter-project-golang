@@ -1,10 +1,15 @@
-FROM golang:1.22
+FROM golang:1.22 AS builder
+
+WORKDIR /app
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o fizzbuzz
+
+FROM scratch
 
 WORKDIR /app
 
-COPY . .
+COPY --from=builder /app/fizzbuzz .
+COPY --from=builder /app/templates ./templates
 
-RUN go build -o build/fizzbuzz
-
-CMD ["./build/fizzbuzz", "serve"]
-
+CMD ["./fizzbuzz", "serve"]
